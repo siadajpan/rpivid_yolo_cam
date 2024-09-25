@@ -5,8 +5,7 @@ import time
 import os
 import av
 import numpy as np
-import sys
-import select
+
 
 # Initialize YOLO model
 model = YOLO("yolov8n.pt")
@@ -130,13 +129,7 @@ def main():
 
     try:
         while not stop_event.is_set():
-            # Let the processes run for a while
-            keyboard_pressed = select.select([sys.stdin], [], [], 1)[0]
-            if keyboard_pressed:
-                print("keyboard pressed")
-                break
-            else:
-                print("keyboard not pressed")
+            time.sleep(1)
 
     except KeyboardInterrupt:
         print("Keyboard interruption")
