@@ -91,23 +91,21 @@ def frame_saver(frame_queue, person_event, stop_event):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
     while not stop_event.is_set():
-        out = None
+        video_path = os.path.join(SAVE_DIR, f"video_{video_count:04d}.mp4")
+        video_writer = None
         person_event.wait()  # Wait until a person is detected
 
         while person_event.is_set():
             frame = frame_queue.get()
 
-            if out is None:
-                video_path = os.path.join(SAVE_DIR, f"video_{video_count:04d}.mp4")
-                print("frame shape", frame.shape)
-                height, width = frame.shape[-2:]
-                out = cv2.VideoWriter(video_path, fourcc, FPS, (width, height))
+            if video_writer is None:
+                height, width = frame.shape[:2]
+                video_writer = cv2.VideoWriter(video_path, fourcc, FPS, (width, height))
 
-            out.write(frame)
-            cv2.imwrite(frame_path, frame)  # Save the frame
-            print(f"Saved {frame.shape}: {frame_path}")
+            video_writer.write(frame)
+            print(f"Saved to: {video_path}")
 
-        out.release()
+        video_writer.release()
         video_count += 1
 
 
