@@ -99,7 +99,8 @@ def frame_saver(frame_queue, person_event, stop_event):
 
             if out is None:
                 video_path = os.path.join(SAVE_DIR, f"video_{video_count:04d}.mp4")
-                height, width = frame.shape
+                print("frame shape", frame.shape)
+                height, width = frame.shape[-2:]
                 out = cv2.VideoWriter(video_path, fourcc, FPS, (width, height))
 
             out.write(frame)
