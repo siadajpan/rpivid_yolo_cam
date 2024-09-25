@@ -14,6 +14,7 @@ model = YOLO("yolov8n.pt")
 SAVE_DIR = "frames"
 FPS = 30.0
 CONFIDENCE_THRESHOLD = 0.5
+FRAMES_WITHOUT_DETECTION = 500
 
 
 # Function to ensure the save directory exists
@@ -47,6 +48,7 @@ def frame_producer(stream_url, frame_queue, stop_event):
 # Function for detecting persons in the frames
 def frame_consumer(frame_queue, stop_event, person_event):
     person_detected = False
+    frames_without_detection = 0
 
     while not stop_event.is_set():  # Run until stop_event is triggered
         frame = frame_queue.get()
@@ -68,10 +70,14 @@ def frame_consumer(frame_queue, stop_event, person_event):
             max_confidence_person = max([confidences[i] for i in range(len(names)) if names[i] == "person"], default=0)
 
             if max_confidence_person > CONFIDENCE_THRESHOLD:
+                frames_without_detection = FRAMES_WITHOUT_DETECTION
                 person_detected = True
                 print("Person detected!")
                 person_event.set()  # Signal that a person is detected
                 break
+            elif frames_without_detection > 0:
+                person_detected = True
+                frames_without_detection -= frame_queue.qsize()
             else:
                 person_detected = False
 
