@@ -15,6 +15,7 @@ SAVE_DIR = "frames"
 FPS = 30.0
 CONFIDENCE_THRESHOLD = 0.5
 FRAMES_WITHOUT_DETECTION = 500
+QUEUE_SIZE = 150
 
 
 # Function to ensure the save directory exists
@@ -118,7 +119,7 @@ def frame_saver(frame_queue, person_event, stop_event):
 # Main process that starts the producer, consumer, and saver
 def main():
     ensure_save_dir()  # Create frames directory if it doesn't exist
-    frame_queue = Queue(maxsize=50)  # Shared queue for frames
+    frame_queue = Queue(maxsize=QUEUE_SIZE)  # Shared queue for frames
     stop_event = Event()            # Event to signal when to stop processes
     person_event = Event()          # Event to signal when a person is detected
 
