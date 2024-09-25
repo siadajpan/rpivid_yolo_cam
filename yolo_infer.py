@@ -13,6 +13,7 @@ model = YOLO("yolov8n.pt")
 # Directory to save frames
 SAVE_DIR = "frames"
 FPS = 30.0
+CONFIDENCE_THRESHOLD = 0.5
 
 
 # Function to ensure the save directory exists
@@ -64,9 +65,9 @@ def frame_consumer(frame_queue, stop_event, person_event):
             if len(classes) == 0:
                 continue
 
-            person_index = np.where(names == "person")
+            max_confidence_person = max([confidences[i] for i in range(len(names)) if names[i] == "person"], default=0)
 
-            if "person" in names and confidences[person_index[0]] > 0.5:
+            if max_confidence_person > CONFIDENCE_THRESHOLD:
                 person_detected = True
                 print("Person detected!")
                 person_event.set()  # Signal that a person is detected
