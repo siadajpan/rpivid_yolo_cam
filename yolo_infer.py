@@ -13,6 +13,8 @@ model = YOLO("yolov8n.pt")
 
 # Directory to save frames
 SAVE_DIR = "frames"
+FPS = 30.0
+
 
 # Function to ensure the save directory exists
 def ensure_save_dir():
@@ -85,16 +87,28 @@ def frame_consumer(frame_queue, stop_event, person_event):
 
 # Function for saving frames when a person is detected
 def frame_saver(frame_queue, person_event, stop_event):
-    frame_count = 0
+    video_count = 0
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+
     while not stop_event.is_set():
+        out = None
         person_event.wait()  # Wait until a person is detected
+
         while person_event.is_set():
             frame = frame_queue.get()
 
-            frame_path = os.path.join(SAVE_DIR, f"frame_{frame_count:04d}.jpg")
+            if out is None:
+                video_path = os.path.join(SAVE_DIR, f"video_{video_count:04d}.mp4")
+                height, width = frame.shape
+                out = cv2.VideoWriter(video_path, fourcc, FPS, (width, height))
+
+            out.write(frame)
             cv2.imwrite(frame_path, frame)  # Save the frame
             print(f"Saved {frame.shape}: {frame_path}")
-            frame_count += 1
+
+        out.release()
+        video_count += 1
+
 
 # Main process that starts the producer, consumer, and saver
 def main():
